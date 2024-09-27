@@ -131,27 +131,6 @@ def listar_productos():
 
 
 # - Buscar productos por categoría: Consultar productos según la categoría especificada por el usuario.
-def list_categorias():
-    conn = None
-    try:
-        conn = sqlite3.connect('productos.db')
-        cursor = conn.cursor()
-
-        cursor.execute('SELECT DISTINCT categoria FROM categorias')
-
-        categorias = cursor.fetchall()
-
-        for categoria in categorias:
-            print(categoria[1])
-
-    except sqlite3.DatabaseError as e:
-        print(f'Error al agregar producto: {e}')
-
-    finally:
-        if conn:
-            conn.close()
-
-
 
 def search_product():
     get_categorias()
@@ -190,6 +169,7 @@ def search_product():
 # - Actualizar el precio y el stock de un producto existente.
 
 def update_prduct():
+    listar_productos()
     id_producto = input("Dame el ID del producto a modificar: ")
 
     conn = sqlite3.connect('productos.db')
@@ -240,8 +220,9 @@ def update_prduct():
 # o en la operación de la base de datos 
 # (como intentar actualizar o eliminar un producto que no existe).
 
-def delete_product(id_producto):
-
+def delete_product():
+    listar_productos()
+    id_producto = int(input("Dame el id del producto: "))
     try:
         conn = sqlite3.connect('productos.db')
         cursor = conn.cursor()
@@ -253,7 +234,7 @@ def delete_product(id_producto):
 
             ''',(id_producto,))
         
-        producto = cursor.fetchall()
+        producto = cursor.fetchone()
 
         if producto:
             cursor.execute('''
@@ -262,7 +243,7 @@ def delete_product(id_producto):
                 WHERE id = ?
 
             ''',(id_producto,))
-
+            print(f"{producto[0]} eliminado")
             conn.commit()
 
         else:
@@ -287,8 +268,7 @@ def mostrar_menu():
         print("3. Buscar producto por cateogia")
         print("4. Actualizar producto")
         print("5. Eliminar producto")
-        print("6. Listar Categorias")
-        print("7. Salir")
+        print("6. Salir")
 
         opcion = input("Seleccione una opción: ")
 
@@ -303,8 +283,6 @@ def mostrar_menu():
         elif opcion == '5':
             delete_product()
         elif opcion == '6':
-            list_categorias()
-        elif opcion == '7':
             print("Saliendo del programa.")
             break
         else:

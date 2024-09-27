@@ -154,28 +154,30 @@ def list_categorias():
 
 
 def search_product():
-
-    categoria = input("Introduce la categoria a buscar: ")
+    get_categorias()
+    categoria_id = input("Introduce la categoria a buscar: ")
 
     try:
         conn = sqlite3.connect('productos.db')
         cursor = conn.cursor()
-
+                       
+                       
         cursor.execute('''
-            SELECT * FROM productos
-                       WHERE categoria = ?
+            SELECT productos.id, productos.nombre, productos.precio, productos.stock 
+            FROM productos
+            WHERE productos.categoria_id = ?
 
-        ''', (categoria,)) 
+        ''', (categoria_id,)) 
 
         productos = cursor.fetchall()
 
         if productos:
-            print(f"===== {categoria} ====")
+ 
             for producto in productos:
-                print(f'Id: {producto[0]} - Producto: {producto[1]} - Categoria: {producto[2]} - Precio: {producto[3]} - Stock: {producto[4]} ')
+                 print( f"Nombre: {producto[1]}, Precio: {producto[2]}, Stock: {producto[3]},  ")
        
         else:
-            print(f"No existe el producto ** {categoria} **")
+            print(f"No existe la cateogria **")
     
     except sqlite3.DatabaseError as e:
         print(f"Error al buscar producto: {e}")
@@ -282,7 +284,7 @@ def mostrar_menu():
         print("\n=== Menú de Productos ===")
         print("1. Agregar producto")
         print("2. Listar productos")
-        print("3. Buscar producto")
+        print("3. Buscar producto por cateogia")
         print("4. Actualizar producto")
         print("5. Eliminar producto")
         print("6. Listar Categorias")

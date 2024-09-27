@@ -42,7 +42,7 @@ def crear_tabla_categorias():
 
         CREATE TABLE IF NOT EXISTS categorias(
                     id  INTEGER PRIMARY KEY AUTOINCREMENT,
-                    nombre TEXT NOT NULL UNIQUE 
+                    nombre TEXT NOT NULL 
                     )
         ''')
 

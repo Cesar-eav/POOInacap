@@ -9,12 +9,15 @@ def add_producto():
         try:
 
             nombre = input("Nombre Producto: ")
-            get_categorias()
-            categoria_id = int(input("Elegir Categoria: "))
+            ids_existentes_categorias = get_categorias()
+            
+            categoria_id = int(input("Elegir ID de la categoría: "))
+            if categoria_id not in ids_existentes_categorias:
+                print("Categoría no válida. Inténtalo de nuevo.")
+                continue
 
             #PRECIO DEBE SER POSITIVO
             precio = int(input("Precio: "))
-
             if precio <= 0:
                 print("El precio debe ser positivo")
                 continue 
@@ -50,7 +53,7 @@ def add_producto():
                 conn.close()
       
       
-        decision = input("¿Quieres modificar otro producto? (s/n): ").lower()
+        decision = input("¿Quieres agregar otro producto? (s/n): ").lower()
         if decision != 's':
             break
 
@@ -89,18 +92,22 @@ def get_categorias():
     conn = None
     try:
         conn = sqlite3.connect('productos.db')
-        
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM categorias')
+        
 
         categorias = cursor.fetchall()
+        
 
         if categorias:
             print("=== Elegir Categoria del Producto ===")
             for categoria in categorias:
                 print(f" {categoria[0]} - {categoria[1]}")
         else:
-            print("No hay categorias")
+            print(f"No existe la categoria")
+            
+        return [categoria[0] for categoria in categorias]
+        
     except sqlite3.DatabaseError as e:
         print(f'Error en DataBase: {e}')
 
@@ -119,7 +126,7 @@ def listar_productos():
         cursor.execute('''
                        SELECT productos.id, productos.nombre, productos.precio, productos.stock, categorias.nombre  
                        FROM PRODUCTOS
-                       INNER JOIN categorias ON productos.categoria_id =categorias.id
+                       INNER JOIN categorias ON productos.categoria_id = categorias.id
                        ''')
         productos = cursor.fetchall()
 
@@ -178,7 +185,7 @@ def search_product():
                     print( f"Nombre: {producto[1]}, Precio: {producto[2]}, Stock: {producto[3]},  ")
         
             else:
-                print(f"No existe la cateogria")
+                print(f"Categoria sin productos")
         
         except sqlite3.DatabaseError as e:
             print(f"Error al buscar producto: {e}")
@@ -317,7 +324,7 @@ def delete_product():
             existen = listar_productos()
 
             if existen == None:
-                continue
+                break
        
             id_producto = int(input("Dame el id del producto: "))
             

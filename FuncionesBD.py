@@ -27,6 +27,7 @@ def add_producto():
 
         except ValueError:
             print("ValueError: Debes ingresar un valor numérico para el precio y el stock.")
+            continue
         except Exception as e:
             print(f"Ha ocurrido un error inesperado: {e}")
             
@@ -49,18 +50,9 @@ def add_producto():
                 conn.close()
       
       
-        while True:
-            try:
-                decision = int(input("Vuelve al menú(1) o Agrega Producto(2): "))
-
-                if decision == 1:
-                    mostrar_menu()
-                elif decision == 2:
-                    break
-                else:
-                    print("Opción no válida, ingresa 1 o 2.")
-            except ValueError:
-                print("ValueError: Debes ingresar un número válido (1 o 2).")
+        decision = input("¿Quieres modificar otro producto? (s/n): ").lower()
+        if decision != 's':
+            break
 
 
 #FUNCION CREA CATEGORIAS INGRESADAS EN MAIN,
@@ -244,41 +236,41 @@ def update_prduct():
                         
                         ''', (id_producto,))
             
-            producto = cursor.fetchall()
+            producto = cursor.fetchone()
             
-            
-            if producto == []:
-
+            if not producto:
                 print("ID NO EXISTE.")
                 continue
             
-            print("***************** FIN CONECTANDO***************")
-
         except sqlite3.DatabaseError as e:
-            print(f'Error al obtener producto: {e}')
-            
-     
-
-
-
-        print(f"{producto}")
-      
-
-        if producto:
-            for p in producto:
-                print("----TU PRODUCTO----")
-                print(f"Id: {p[0]}, Nombre: {p[1]}, Categoría: {p[2]}, Precio: {p[3]}, Stock: {p[4]}")
+            print(f'DatabaseError: Error al obtener producto: {e}')
+            continue      
+        
+        
+        #SI EXISTE EL PRODUCTO, ACTUALIZALO.
+        try:
+  
+            print(f"----TU PRODUCTO {producto[1]}----")
+            print(f"Id: {producto[0]}, Nombre: {producto[1]}, Categoría: {producto[2]}, Precio: {producto[3]}, Stock: {producto[4]}")
 
             nuevo_precio = int(input("Ingresar nuevo precio: "))
+            #VALIDACION NUEVO PRECIO
+            if nuevo_precio <=0:
+                print("El precio debe ser positivo")
+                continue
+            
+                    
             nuevo_stock = int(input("Ingresar Stock: "))
+            #VALIDACION STOCK
+            if nuevo_stock < 0:
+                print("El stock debe ser igual o mayor a 0")
+                continue
 
+            #ACTUALIZAR BD
             cursor.execute('''
                 UPDATE productos
                     SET precio = ?, stock = ?
                     WHERE id = ?
-                        
-                    
-
             ''',(nuevo_precio,nuevo_stock,id_producto ) )
 
             conn.commit()
@@ -287,10 +279,23 @@ def update_prduct():
             print(f"Nuevo precio: {nuevo_precio}, Nuevo stock: {nuevo_stock}")
         
         
-        else:
-            print("NO EXISTE EL PRODUCO / ID")
+        except ValueError:
+            print("Debes ingresar valores numéricos válidos para el precio y el stock.")
+            continue
+        
+        except sqlite3.DatabaseError as e:
+            print(f'Error al obtener producto: {e}')
+            
+            
+        finally:
+            if conn:
+                conn.close()
+                
+        decision = input("¿Quieres modificar otro producto? (s/n): ").lower()
+        if decision != 's':
+            break
+            
 
-            conn.close()
 
 
 

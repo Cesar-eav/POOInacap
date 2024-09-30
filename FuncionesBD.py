@@ -309,42 +309,70 @@ def update_prduct():
 # (como intentar actualizar o eliminar un producto que no existe).
 
 def delete_product():
-    listar_productos()
-    id_producto = int(input("Dame el id del producto: "))
-    try:
-        conn = sqlite3.connect('productos.db')
-        cursor = conn.cursor()
+    
+    while True:
+        conn = None
+        try:
+            
+            existen = listar_productos()
 
-        cursor.execute('''
-
-            SELECT * FROM productos
-                WHERE id = ? 
-
-            ''',(id_producto,))
+            if existen == None:
+                continue
+       
+            id_producto = int(input("Dame el id del producto: "))
+            
+            if id_producto <= 0:
+                print("El ID debe ser positivo")
+                continue
+            
+        except ValueError:
+            print("Ingresar valor válido")
+            continue
+           
+        except Exception as e:
+            print(f"Ha ocurrido un error inesperado: {e}")
+            
         
-        producto = cursor.fetchone()
+        #TRY BASE DE DATOS Y ELIMINAR
+        try:
+            conn = sqlite3.connect('productos.db')
+            cursor = conn.cursor()
 
-        if producto:
             cursor.execute('''
 
-            DELETE FROM productos
-                WHERE id = ?
+                SELECT * FROM productos
+                    WHERE id = ? 
 
-            ''',(id_producto,))
-            print(f"{producto[0]} eliminado")
-            conn.commit()
+                ''',(id_producto,))
+            
+            producto = cursor.fetchone()
 
-        else:
-            print("No existe el ID del producto que buscas")
-    
-    except sqlite3.DatabaseError as e:
-        print(f'DatabaseError: {e}')
+            if producto:
+                cursor.execute('''
 
-    except Exception as e:
-        print(f"Ha ocurrido un error inesperado: {e}")
-      
-    
-    conn.close()
+                DELETE FROM productos
+                    WHERE id = ?
+
+                ''',(id_producto,))
+                print(f"{producto[0]} eliminado")
+                conn.commit()
+
+            else:
+                print("No existe el ID del producto que buscas")
+        
+        except sqlite3.DatabaseError as e:
+            print(f'DatabaseError: {e}')
+
+        except Exception as e:
+            print(f"Ha ocurrido un error inesperado: {e}")
+        
+        finally:
+            if conn:    
+                conn.close()
+        
+        decision = input("¿Quieres eliminar otro producto? (s/n)").lower()
+        if decision != 's':
+            break
 
 
 def mostrar_menu():
